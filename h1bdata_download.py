@@ -5,8 +5,8 @@
 # Python 3.5.2 :: Anaconda 4.1.1 (64-bit)
 # Linux-3.13.0-74-generic-x86_64-with-debian-jessie-sid
 # Number of cpu cores: 8
-# Program runtime: 854.3 seconds
 # Number of records downloaded: 3886329 rows and 14 columns
+# Program runtime: 15 minutes
 
 
 import ssl

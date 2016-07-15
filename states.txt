@@ -9,6 +9,7 @@ CT: Connecticut
 DC: District Of Columbia
 DE: Delaware
 FL: Florida
+FM: Federated States Of Micronesia
 GA: Georgia
 GU: Guam
 HI: Hawaii
@@ -22,6 +23,7 @@ LA: Louisiana
 MA: Massachusetts
 MD: Maryland
 ME: Maine
+MH: Marshall Islands
 MI: Michigan
 MN: Minnesota
 MO: Missouri
@@ -42,6 +44,7 @@ OK: Oklahoma
 OR: Oregon
 PA: Pennsylvania
 PR: Puerto Rico
+PW: Palau
 RI: Rhode Island
 SC: South Carolina
 SD: South Dakota
@@ -55,11 +58,3 @@ WA: Washington
 WI: Wisconsin
 WV: West Virginia
 WY: Wyoming
-AS: American Samoa
-FM: Federated States Of Micronesia
-GU: Guam
-MH: Marshall Islands
-MP: Northern Mariana Islands
-PW: Palau
-PR: Puerto Rico
-VI: Virgin Islands

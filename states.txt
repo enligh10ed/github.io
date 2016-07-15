@@ -6,7 +6,7 @@ AZ: Arizona
 CA: California
 CO: Colorado
 CT: Connecticut
-DC: District of Columbia
+DC: District Of Columbia
 DE: Delaware
 FL: Florida
 GA: Georgia
@@ -56,7 +56,7 @@ WI: Wisconsin
 WV: West Virginia
 WY: Wyoming
 AS: American Samoa
-FM: Federated States of Micronesia
+FM: Federated States Of Micronesia
 GU: Guam
 MH: Marshall Islands
 MP: Northern Mariana Islands

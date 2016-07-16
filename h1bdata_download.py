@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-# This script downloads and restructures H1-B work visa data from agencies of 
-# the U.S. Labor Department. Let's definte 3 functions to help us do that.
-# I develped and tested this code on:
+# This script downloads and restructures work visa (H1B) data from agencies of 
+# the U.S. Labor Department. I developed and tested this code on:
+
 # Python 3.5.2 :: Anaconda 4.1.1 (64-bit)
 # Linux-3.13.0-74-generic-x86_64-with-debian-jessie-sid
 # Number of cpu cores: 8
+
+# As at the time I ran the code, the program output was as follows:
 # Number of records downloaded: 3886329 rows and 14 columns
 # Program runtime: 15 minutes
 

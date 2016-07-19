@@ -7,8 +7,8 @@
 # Number of cpu cores: 8
 
 # As at the time I ran the code, the program output was as follows:
-# Number of records downloaded: 3886329 rows and 14 columns
-# Program runtime: 15 minutes
+# Number of records downloaded: 5231213 rows and 14 columns
+# Program runtime: 14.4 minutes
 
 
 import ssl
@@ -28,13 +28,14 @@ def getXlsxData(url):
     EC2 m4.2xlarge Linux instance and was getting an 
     “SSL: CERTIFICATE_VERIFY_FAILED” Error from foreignlaborcert.doleta.gov. 
     I tried various things to get around the error and the only thing that 
-    worked is the stackoverflow suggestion here. If you've a better idea, 
+    worked is the stackoverflow suggestion here: 
+    http://stackoverflow.com/a/28052583/3594865. If you've a better idea, 
     I'd love to hear it!
 """
     
     ssl._create_default_https_context = ssl._create_unverified_context
     context = ssl._create_unverified_context()
-    response = urlopen(url)
+    response = urlopen(url, context=context)
     xl = pd.ExcelFile(response)
     sheet_names = xl.sheet_names
     
@@ -120,7 +121,7 @@ def getXlsxData(url):
         tempDF["Prevailing_Wage"] = currentDF['PW_1']
         
         currentDF = tempDF
-    
+    print("{0}: {1} rows".format(sheet_names[0], len(currentDF)))
     return currentDF.values.tolist()
     
 
@@ -128,74 +129,66 @@ def getZippedData(url):
     """This function downloads H1B files from the old H1-B system hosted at
     at flcdatacenter.com.The files are available for 2002 to 2007. """
     
-    # This is so we don't read wrong files (such as .doc metadata) in the zipped folder.
-    filenames = ["H1B_efile_FY06.txt",
-                 "H1B_efile_FY03.txt",
-                 "H1B_efile_FY04.txt",
-                 "H1B_efile_FY05.txt",
-                 "EFILE_FY2007.txt",
-                 "H1B_efile_FY02.txt"]
-    
     r = requests.get(url)
-    z = zipfile.ZipFile(io.BytesIO(r.content))
-    
-    # Get the contents of the unzipped file
-    names = z.namelist() 
+    zf = zipfile.ZipFile(io.BytesIO(r.content))
     all_lines = []
-    for name in names:
-        if name in filenames:
-            lines = z.read(name).decode(encoding='windows-1252').split("\n")
-            all_lines = all_lines + lines[1:]
+    for name in zf.namelist():
+        if name.endswith(".txt"):
+            currentFile = []
+            stream = None
+            stream = zf.open(name)    
+        # Get the contents of the unzipped file 
+            for line in stream:
+                string = line.decode(encoding='windows-1252')
+                currentFile.append(string)
+            all_lines = all_lines + currentFile[1:]
+            print("{0}: {1} rows".format(name, len(currentFile)))
     
-    # Get headers from the last file
-    headers = lines[0].strip().split(",")
-    headers = [string[1:-1] for string in headers]
-        
-    data = []
-    for line in all_lines:
-        data.append(line.strip().split("\t"))
     clean = []
-    
-    # Using reader() below helps to avoid splitting the data on inner commas.
-    # E.g., Google, Inc. will not be splitted into two
-    for item in data:
-        for line in reader(item): 
-            clean.append(line)
+         
+##   Using reader() below helps to avoid splitting the data on inner commas.
+##   E.g., Google, Inc. will not be splitted into two
+    for item in all_lines:
+        thisList = []
+        for line in reader(item.split(",")): 
+            try:
+                thisList.append(line[0])
+            except IndexError:
+                thisList.append("")  
+        clean.append(thisList)
     currentDF = pd.DataFrame(clean)
-    currentDF.columns = headers
-    
+            
     try:
         currentDF.drop(currentDF.columns[[2,4,5,9,10,11,13,14,15,16,20,25,26,27,28,29,30,31,32,
-                                          33,34,35,36,37,38]], axis=1, inplace=True)
-    except (AttributeError, KeyError) as e:
+                                                  33,34,35,36,37,38]], axis=1, inplace=True)
+    except (AttributeError, KeyError, IndexError) as e:
         currentDF.drop(currentDF.columns[[3,4,8,9,10,12,13,14,15,19,24,25,26,27,28,29,30,31,32,
-                                          33,34,35,36]], axis=1, inplace=True)  
+                                                  33,34,35,36]], axis=1, inplace=True)  
     return currentDF.values.tolist()
-    
+
 
 def collect_results(result):
     """Uses Python multiprocessing apply_async's callback to 
     setup up a separate Queue for each process"""
     results.extend(result)
 
-
 if __name__ == "__main__":
 
 	# Define the data sources
-    urls = ["http://www.flcdatacenter.com/download/H1B_efile_FY07_text.zip", 
-               "http://www.flcdatacenter.com/download/H1B_efile_FY06_text.zip",
-               "http://www.flcdatacenter.com/download/H1B_efile_FY04_text.zip",
-               "http://www.flcdatacenter.com/download/H1B_efile_FY03_text.zip",
-               "http://www.flcdatacenter.com/download/H1B_efile_FY02_text.zip",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_Case_Data_FY2008.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_Case_Data_FY2009.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/Icert_%20LCA_%20FY2009.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_FY2010.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_iCert_LCA_FY2011_Q4.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/py2012_q4/LCA_FY2012_Q4.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/lca/LCA_FY2013.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/py2014q4/H-1B_FY14_Q4.xlsx",
-               "https://www.foreignlaborcert.doleta.gov/docs/py2015q4/H-1B_Disclosure_Data_FY15_Q4.xlsx"]
+    urls = ["http://www.flcdatacenter.com/download/H1B_efile_FY07_text.zip",
+            "http://www.flcdatacenter.com/download/H1B_efile_FY06_text.zip",
+            "http://www.flcdatacenter.com/download/H1B_efile_FY04_text.zip",
+            "http://www.flcdatacenter.com/download/H1B_efile_FY03_text.zip",
+            "http://www.flcdatacenter.com/download/H1B_efile_FY02_text.zip",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_Case_Data_FY2008.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_Case_Data_FY2009.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/Icert_%20LCA_%20FY2009.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_FY2010.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/H-1B_iCert_LCA_FY2011_Q4.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/py2012_q4/LCA_FY2012_Q4.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/lca/LCA_FY2013.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/py2014q4/H-1B_FY14_Q4.xlsx",
+            "https://www.foreignlaborcert.doleta.gov/docs/py2015q4/H-1B_Disclosure_Data_FY15_Q4.xlsx"]
     
 	# Define a list to collect the content from each data source
     results = []
@@ -203,10 +196,10 @@ if __name__ == "__main__":
 	# Define the headers of the restructured
     new_headers =  ["Submitted_Date", 
                         "Case_Number", 
-                        "Name", 
-                        "City", 
-                        "State", 
-                        "Postal_Code", 
+                        "Employer_Name", 
+                        "Employer_City", 
+                        "Employer_State", 
+                        "Employer_Postal_Code", 
                         "Job_Title", 
                         "Approval_Status",
                         "Wage_Rate", 
@@ -230,5 +223,5 @@ if __name__ == "__main__":
     # Merge the data frames
     h1bdataDF = pd.DataFrame(results, columns=new_headers)
     pickle.dump(h1bdataDF, open('h1bdataDF.pkl', 'wb'))
-    print("Time to read and restructure DOL files --- %s seconds ---" % (time.time() - start_time))  
     print("h1bdataDF: {0}".format(h1bdataDF.shape))
+    print("Time to read and restructure DOL files --- %s minutes ---" % ((time.time() - start_time)/60))  

@@ -2,13 +2,14 @@
 # This script downloads and restructures work visa (H1B) data from agencies of 
 # the U.S. Labor Department. I developed and tested this code on:
 
+# Amazon EC2 m4.2xlarge instance
 # Python 3.5.2 :: Anaconda 4.1.1 (64-bit)
-# Linux-3.13.0-74-generic-x86_64-with-debian-jessie-sid
+# Linux-3.13.0-92-generic-x86_64-with-debian-jessie-sid
 # Number of cpu cores: 8
 
 # As at the time I ran the code, the program output was as follows:
 # Number of records downloaded: 5231213 rows and 14 columns
-# Program runtime: 14.4 minutes
+# Program runtime: Approx. 16 minutes
 
 
 import ssl

@@ -8,8 +8,8 @@
 # I opted to use Python 2.7 because the slideshare package used in this 
 # module is written in Python 2.7. As at the time I ran the code, 
 # the program output was as follows:
-# Number of presentations downloaded: 6728
-# Program runtime: Approx. 80 minutes (needed to maintain slideshare.net crawl 
+# Number of presentations downloaded: 6743
+# Program runtime: Approx. 244 minutes (needed to maintain slideshare.net crawl 
 # policy of 5 second delay)
 
 import re
